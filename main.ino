@@ -63,7 +63,6 @@ void setup() {
 
 /* Chamadas do programa */
 void loop() {
-
     LGPS.getData(&info);
     printGPGGA((char*)info.GPGGA);
     Serial.println("**************************************");
