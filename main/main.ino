@@ -1,17 +1,21 @@
 #include <LTask.h>
 #include <LGPS.h>
-#include <LWiFi.h>
+#include <LGPRS.h>      //include the base GPRS library
+#include <LGPRSClient.h>  //include the ability to Post and Get information using HTTP
+#include <LGPRSUdp.h>
 #include <LWiFiClient.h>
 
-#define WIFI_AP "nome_de_seu_wifi"
-#define WIFI_PASSWORD "senha_do_seu_wifi"
-#define WIFI_AUTH LWIFI_WPA // choose from LWIFI_OPEN, LWIFI_WPA, or LWIFI_WEP.
+#define APN "zap.vivo.com.br" // APN of your cellular provider
+#define APN_USER "vivo"
+#define APN_PASS "vivo"
 
 gpsSentenceInfoStruct info;
-int id = 1;
+LGPRSUDP udp;
 LWiFiClient client;
+
 char latitude[20];
 char longitude[20];
+int id = 1;
 
 /* Realiza o setup do programa */
 void setup()
@@ -20,7 +24,7 @@ void setup()
   LGPS.powerOn();
   Serial.println("*************** Inicio - Setup *************** ");
   Serial.println("[Setup] GPS inicializado.");
-  connectWifi("setup");
+  connectGSM("setup");
   Serial.println("*************** Fim - Setup *************** ");
 }
 
@@ -36,7 +40,7 @@ void loop()
 
   connectAPI();
 
-  connectWifi("loop");
+  connectGSM("loop");
 
   // send HTTP request, ends with 2 CR/LF
   String PostData = montaBody(latitude, longitude);
@@ -79,11 +83,12 @@ void loop()
  */
 
 /* Transforma cada info recebida do GPS */
-const char *nextToken(const char *src, char *buf)
+const char *nextToken(const char* src, char* buf)
 {
   int i = 0;
   while (src[i] != 0 && src[i] != ',')
     i++;
+
   if (buf)
   {
     strncpy(buf, src, i);
@@ -91,6 +96,7 @@ const char *nextToken(const char *src, char *buf)
   }
   if (src[i])
     i++;
+
   return src + i;
 }
 
@@ -140,9 +146,13 @@ void printGPGGA()
  */
 void connectAPI()
 {
+  Serial.println("DFR");
+  Serial.println(Serial.read());
+  Serial.println(Serial.available());
+
   // keep retrying until connected to website
   Serial.println("[API] Conectando");
-  IPAddress server(999, 999, 9, 99); // Ipv4 da API
+  IPAddress server(192, 168, 0, 69); // Ipv4 da API
   while (0 == client.connect(server, 5000))
   {
     Serial.println("[API] Re-Conectando");
@@ -152,37 +162,15 @@ void connectAPI()
   Serial.println("[API] Conectado");
 }
 
-void connectWifi(String caminho)
+void connectGSM(String caminho)
 {
-  LWifiStatus ws = LWiFi.status();
-  boolean status = wifi_status(ws);
-  if (!status)
-  {
-    Serial.println("[WIFI-" + caminho + "] Conectando");
-    while (0 == LWiFi.connect(WIFI_AP, LWiFiLoginInfo(WIFI_AUTH, WIFI_PASSWORD)))
-    {
-      Serial.println("[WIFI-" + caminho + "] Re-Conectando");
-      delay(100);
-    }
+  pinMode(13, OUTPUT);
+  Serial.println("Conectando o GSM");   // Attach to GPRS network - need to add timeout
+  while (!LGPRS.attachGPRS(APN,APN_USER,APN_PASS)) {
+    Serial.println("Re-Conectando o GSM");
+    delay(100);
   }
-  Serial.println("[WIFI-" + caminho + "] Conectado");
-}
-
-boolean wifi_status(LWifiStatus ws)
-{
-  switch (ws)
-  {
-  case LWIFI_STATUS_DISABLED:
-    return false;
-    break;
-  case LWIFI_STATUS_DISCONNECTED:
-    return false;
-    break;
-  case LWIFI_STATUS_CONNECTED:
-    return true;
-    break;
-  }
-  return false;
+  Serial.println("Conectado o GSM!");
 }
 
 //build JSON method
