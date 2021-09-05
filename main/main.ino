@@ -1,7 +1,7 @@
 #include <LTask.h>
 #include <LGPS.h>
-#include <LGPRS.h>      //include the base GPRS library
-#include <LGPRSClient.h>  //include the ability to Post and Get information using HTTP
+#include <LGPRS.h>       //include the base GPRS library
+#include <LGPRSClient.h> //include the ability to Post and Get information using HTTP
 #include <LGPRSUdp.h>
 #include <LWiFiClient.h>
 
@@ -83,7 +83,7 @@ void loop()
  */
 
 /* Transforma cada info recebida do GPS */
-const char *nextToken(const char* src, char* buf)
+const char *nextToken(const char *src, char *buf)
 {
   int i = 0;
   while (src[i] != 0 && src[i] != ',')
@@ -152,7 +152,7 @@ void connectAPI()
 
   // keep retrying until connected to website
   Serial.println("[API] Conectando");
-  IPAddress server(192, 168, 0, 69); // Ipv4 da API
+  IPAddress server(127, 0, 0, 1); // Ipv4 da API
   while (0 == client.connect(server, 5000))
   {
     Serial.println("[API] Re-Conectando");
@@ -165,8 +165,9 @@ void connectAPI()
 void connectGSM(String caminho)
 {
   pinMode(13, OUTPUT);
-  Serial.println("Conectando o GSM");   // Attach to GPRS network - need to add timeout
-  while (!LGPRS.attachGPRS(APN,APN_USER,APN_PASS)) {
+  Serial.println("Conectando o GSM"); // Attach to GPRS network - need to add timeout
+  while (!LGPRS.attachGPRS(APN, APN_USER, APN_PASS))
+  {
     Serial.println("Re-Conectando o GSM");
     delay(100);
   }
