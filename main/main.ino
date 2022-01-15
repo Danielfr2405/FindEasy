@@ -18,10 +18,11 @@ void setup()
 {
   Serial.begin(115200);
   LGPS.powerOn();
-  Serial.println("*************** Inicio - Setup *************** ");
+  Serial.println("----- Inicio - Setup -----");
   Serial.println("[Setup] GPS inicializado.");
   connectWifi("setup");
-  Serial.println("*************** Fim - Setup *************** ");
+  Serial.println("------ Fim - Setup ------");
+  Serial.println("-------------------------");
 }
 
 /* Chamadas do programa */
@@ -29,10 +30,9 @@ void loop()
 {
   LGPS.getData(&info);
 
-  Serial.println("*************** Inicio - Loop *************** ");
-  Serial.println("---------------------------------------");
+  Serial.println("---- Inicio - Loop ----");
   printGPGGA();
-  Serial.println("---------------------------------------");
+  Serial.println("-----------------------");
 
   connectAPI();
 
@@ -69,7 +69,8 @@ void loop()
   }
 
   Serial.println("[API] Finalizado");
-  Serial.println("*************** Fim - Loop *************** ");
+  Serial.println("------- Fim - Loop -------");
+  Serial.println("**************************");
 
   delay(1000);
 }
@@ -105,6 +106,10 @@ void printGPGGA()
     char buf[20];
     const char *p = str;
 
+    Serial.println("------ Info. GPS ------");
+    Serial.println((char *)info.GPGGA);
+    Serial.println("");
+
     p = nextToken(p, 0);         // GGA
     p = nextToken(p, 0);         // Time
     p = nextToken(p, latitude);  // Latitude
@@ -114,6 +119,7 @@ void printGPGGA()
     p = nextToken(p, buf);       // fix quality
 
     isFounded = buf[0] == '1';
+//    isFounded = strlen(latitude) > 0 && strlen(longitude);
 
     if (isFounded)
     {
