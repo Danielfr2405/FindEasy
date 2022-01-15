@@ -146,7 +146,6 @@ void printGPGGA()
  */
 void connectAPI()
 {
-  Serial.println("DFR");
   Serial.println(Serial.read());
   Serial.println(Serial.available());
 
